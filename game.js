@@ -75,7 +75,7 @@ function drawGameOver() {
     ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 20);
     ctx.font = '24px Arial';
     ctx.fillText('Score: ' + score, canvas.width / 2, canvas.height / 2 + 20);
-    ctx.fillText('Press Space to Restart', canvas.width / 2, canvas.height / 2 + 60);
+    ctx.fillText('Press Space, Click, or Tap to Restart', canvas.width / 2, canvas.height / 2 + 60);
 }
 
 function drawWaiting() {
@@ -86,7 +86,7 @@ function drawWaiting() {
     ctx.textAlign = 'center';
     ctx.fillText('Flappy UFO', canvas.width / 2, canvas.height / 2 - 30);
     ctx.font = '24px Arial';
-    ctx.fillText('Press Space to Start', canvas.width / 2, canvas.height / 2 + 20);
+    ctx.fillText('Press Space, Click, or Tap to Start', canvas.width / 2, canvas.height / 2 + 20);
 }
 
 function update() {
