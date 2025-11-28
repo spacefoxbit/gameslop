@@ -161,4 +161,19 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Touch support for mobile devices
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    if (waiting) {
+        waiting = false;
+        ufoVY = FLAP;
+        return;
+    }
+    if (gameOver) {
+        resetGame();
+    } else {
+        ufoVY = FLAP;
+    }
+}, { passive: false });
+
 gameLoop();
