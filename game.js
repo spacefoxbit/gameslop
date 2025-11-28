@@ -176,9 +176,8 @@ function handleFlapOrRestart() {
 }
 
 canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
     handleFlapOrRestart();
-}, { passive: false });
+}, { passive: true });
 
 canvas.addEventListener('mousedown', function(e) {
     handleFlapOrRestart();
