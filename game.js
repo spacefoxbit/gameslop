@@ -161,9 +161,8 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Touch support for mobile devices
-canvas.addEventListener('touchstart', function(e) {
-    e.preventDefault();
+// Touch and mouse support for mobile and desktop
+function handleFlapOrRestart() {
     if (waiting) {
         waiting = false;
         ufoVY = FLAP;
@@ -174,6 +173,15 @@ canvas.addEventListener('touchstart', function(e) {
     } else {
         ufoVY = FLAP;
     }
+}
+
+canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handleFlapOrRestart();
 }, { passive: false });
+
+canvas.addEventListener('mousedown', function(e) {
+    handleFlapOrRestart();
+});
 
 gameLoop();
