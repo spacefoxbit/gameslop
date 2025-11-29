@@ -24,6 +24,7 @@ let lastTime = performance.now();
 let spawnTimer = 0;
 let spawnInterval = SPAWN_INTERVAL;
 let lastScoreForSpeedup = 0;
+let bgHue = 200; // Start with sky blue
 
 function resetGame() {
     ufoY = canvas.height / 2;
@@ -36,6 +37,7 @@ function resetGame() {
     spawnTimer = 0;
     spawnInterval = SPAWN_INTERVAL;
     lastScoreForSpeedup = 0;
+    bgHue = 200;
 }
 
 function drawUFO(x, y) {
@@ -149,8 +151,18 @@ function update(dt) {
     }
 }
 
+function updateBackgroundColor() {
+    // Change hue every 20 points
+    bgHue = 200 + ((Math.floor(score / 20) * 30) % 120); // Cycle through blue, purple, greenish
+}
+
 function draw() {
+    updateBackgroundColor();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.fillStyle = `hsl(${bgHue}, 60%, 70%)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
     for (let t of trees) {
         drawTree(t.x, t.gapY);
     }
