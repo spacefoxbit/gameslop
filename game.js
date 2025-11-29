@@ -2,13 +2,14 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Game constants
-const GRAVITY = 0.065; // was 0.045
-const FLAP = -3.5;     // was -2.5
+// Double the speed for browser
+const GRAVITY = 0.13; // was 0.065
+const FLAP = -7.0;    // was -3.5
 const UFO_RADIUS = 20;
 const TREE_WIDTH = 60;
 const GAP_HEIGHT = 300;
-const TREE_SPEED = 1.3; // was 0.9
-const SPAWN_INTERVAL = 180 / 60; // was 240/60, spawn pipes more often
+const TREE_SPEED = 2.6; // was 1.3
+const SPAWN_INTERVAL = 90 / 60; // was 180/60, spawn pipes even more often
 
 // UFO
 let ufoY = canvas.height / 2;
