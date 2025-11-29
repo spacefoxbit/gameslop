@@ -22,6 +22,8 @@ let gameOver = false;
 let waiting = true; // waiting for first space
 let lastTime = performance.now();
 let spawnTimer = 0;
+let spawnInterval = SPAWN_INTERVAL;
+let lastScoreForSpeedup = 0;
 
 function resetGame() {
     ufoY = canvas.height / 2;
@@ -31,6 +33,9 @@ function resetGame() {
     score = 0;
     gameOver = false;
     waiting = true;
+    spawnTimer = 0;
+    spawnInterval = SPAWN_INTERVAL;
+    lastScoreForSpeedup = 0;
 }
 
 function drawUFO(x, y) {
@@ -99,9 +104,15 @@ function update(dt) {
     ufoVY += GRAVITY * dt * 60;
     ufoY += ufoVY * dt * 60;
 
+    // Speed up spawn interval every 20 points
+    if (score - lastScoreForSpeedup >= 20) {
+        spawnInterval *= 0.9; // 10% faster
+        lastScoreForSpeedup = score;
+    }
+
     // Add new trees based on time
     spawnTimer += dt;
-    if (spawnTimer >= SPAWN_INTERVAL) {
+    if (spawnTimer >= spawnInterval) {
         spawnTimer = 0;
         const minGapY = 20;
         const maxGapY = canvas.height - GAP_HEIGHT - 20;
