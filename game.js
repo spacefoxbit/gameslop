@@ -39,8 +39,11 @@ function resetGame() {
 }
 
 function drawUFO(x, y) {
+    // Calculate rotation based on vertical velocity
+    let angle = Math.max(Math.min(ufoVY / 12, 0.5), -0.5); // Clamp between -0.5 and 0.5 radians
     ctx.save();
     ctx.translate(x, y);
+    ctx.rotate(angle);
     ctx.beginPath();
     ctx.ellipse(0, 0, UFO_RADIUS, UFO_RADIUS * 0.6, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#b3f0ff';
