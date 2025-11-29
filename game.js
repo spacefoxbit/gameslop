@@ -16,6 +16,9 @@ const SPAWN_INTERVAL = (90 / 60) / SPEED_MULTIPLIER; // was 180/60, spawn pipes 
 let ufoY = canvas.height / 2;
 let ufoVY = 0;
 let trees = [];
+let stars = [];
+let pipesPassed = 0;
+let nextStarPipeIndex = 9; // 0-based, so 10th pipe
 let frame = 0;
 let score = 0;
 let gameOver = false;
@@ -30,6 +33,9 @@ function resetGame() {
     ufoY = canvas.height / 2;
     ufoVY = 0;
     trees = [];
+    stars = [];
+    pipesPassed = 0;
+    nextStarPipeIndex = 9;
     frame = 0;
     score = 0;
     gameOver = false;
@@ -86,19 +92,33 @@ function checkCollision(ufoX, ufoY, tree) {
     return false;
 }
 
-function drawTree(x, gapY) {
-    // Roblox-style pixelated tree
+// Helper to draw a crescent moon
+function drawMoon(cx, cy, radius, color) {
     ctx.save();
-    // Trunk
-    ctx.fillStyle = '#7c4a03';
-    ctx.fillRect(x + TREE_WIDTH/3, gapY - 32, TREE_WIDTH/3, 32);
-    ctx.fillRect(x + TREE_WIDTH/3, gapY + GAP_HEIGHT, TREE_WIDTH/3, 32);
-    // Leaves (pixelated blocks)
-    ctx.fillStyle = '#3cb043';
-    for (let i = 0; i < 4; i++) {
-        ctx.fillRect(x, gapY - (i+1)*16, TREE_WIDTH, 16);
-        ctx.fillRect(x, gapY + GAP_HEIGHT + i*16, TREE_WIDTH, 16);
-    }
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0.5 * Math.PI, 1.5 * Math.PI, false);
+    ctx.arc(cx + radius * 0.5, cy, radius, 1.5 * Math.PI, 0.5 * Math.PI, true);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawTree(x, gapY) {
+    // Pipe-like tree (classic Flappy Bird style)
+    ctx.save();
+    // Top pipe
+    ctx.fillStyle = '#228B22';
+    ctx.fillRect(x, 0, TREE_WIDTH, gapY);
+    ctx.fillStyle = '#1a5e1a';
+    ctx.fillRect(x - 4, gapY - 16, TREE_WIDTH + 8, 16); // pipe lip
+    // Bottom pipe
+    ctx.fillStyle = '#228B22';
+    ctx.fillRect(x, gapY + GAP_HEIGHT, TREE_WIDTH, canvas.height - (gapY + GAP_HEIGHT));
+    ctx.fillStyle = '#1a5e1a';
+    ctx.fillRect(x - 4, gapY + GAP_HEIGHT, TREE_WIDTH + 8, 16); // pipe lip
     ctx.restore();
 }
 
@@ -130,6 +150,31 @@ function drawWaiting() {
     ctx.fillText('Flappy UFO', canvas.width / 2, canvas.height / 2 - 30);
     ctx.font = '24px Arial';
     ctx.fillText('Press Space, Click, or Tap to Start', canvas.width / 2, canvas.height / 2 + 20);
+}
+
+// Helper to draw a fireball
+function drawFireball(cx, cy, r) {
+    // Outer glow
+    let grad = ctx.createRadialGradient(cx, cy, r * 0.3, cx, cy, r);
+    grad.addColorStop(0, '#fffbe7');
+    grad.addColorStop(0.5, '#ffb347');
+    grad.addColorStop(1, '#ff4500');
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.shadowColor = '#ffb347';
+    ctx.shadowBlur = 16;
+    ctx.fill();
+    ctx.restore();
+    // Inner core
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fffbe7';
+    ctx.globalAlpha = 0.7;
+    ctx.fill();
+    ctx.restore();
 }
 
 function update(dt) {
@@ -166,8 +211,39 @@ function update(dt) {
         if (!t.passed && t.x + TREE_WIDTH < 80) {
             score++;
             t.passed = true;
+            pipesPassed++;
+            // If this is the pipe before the next star pipe
+            if ((pipesPassed - 1) === nextStarPipeIndex) {
+                // Shoot a star up from the next pipe's gap
+                let nextPipe = trees.find(tp => !tp.passed && tp !== t);
+                if (nextPipe) {
+                    stars.push({
+                        x: nextPipe.x + TREE_WIDTH / 2,
+                        y: nextPipe.gapY + GAP_HEIGHT,
+                        vx: 0,
+                        vy: -1.2, // slow upward
+                        r: 14
+                    });
+                }
+                nextStarPipeIndex += 10;
+            }
         }
         if (checkCollision(80, ufoY, t)) {
+            gameOver = true;
+        }
+    }
+    // Move stars
+    for (let s of stars) {
+        s.x += s.vx;
+        s.y += s.vy;
+    }
+    // Remove off-screen stars
+    stars = stars.filter(s => s.y + s.r > 0);
+    // Star collision
+    for (let s of stars) {
+        let dx = 80 - s.x;
+        let dy = ufoY - s.y;
+        if (Math.sqrt(dx*dx + dy*dy) < s.r + UFO_HITBOX_RADIUS_X) {
             gameOver = true;
         }
     }
@@ -198,6 +274,10 @@ function draw() {
     drawScore();
     if (waiting) drawWaiting();
     if (gameOver) drawGameOver();
+    // Draw stars
+    for (let s of stars) {
+        drawFireball(s.x, s.y, s.r);
+    }
 }
 
 function gameLoop(now) {
