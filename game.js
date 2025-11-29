@@ -2,12 +2,13 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Game constants
-const GRAVITY = 0.045;
-const FLAP = -2.5;
+const GRAVITY = 0.065; // was 0.045
+const FLAP = -3.5;     // was -2.5
 const UFO_RADIUS = 20;
 const TREE_WIDTH = 60;
 const GAP_HEIGHT = 300;
-const TREE_SPEED = 0.9;
+const TREE_SPEED = 1.3; // was 0.9
+const SPAWN_INTERVAL = 180 / 60; // was 240/60, spawn pipes more often
 
 // UFO
 let ufoY = canvas.height / 2;
@@ -19,7 +20,6 @@ let gameOver = false;
 let waiting = true; // waiting for first space
 let lastTime = performance.now();
 let spawnTimer = 0;
-const SPAWN_INTERVAL = 240 / 60; // 240 frames at 60fps = 4s
 
 function resetGame() {
     ufoY = canvas.height / 2;
