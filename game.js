@@ -17,6 +17,9 @@ let frame = 0;
 let score = 0;
 let gameOver = false;
 let waiting = true; // waiting for first space
+let lastTime = performance.now();
+let spawnTimer = 0;
+const SPAWN_INTERVAL = 240 / 60; // 240 frames at 60fps = 4s
 
 function resetGame() {
     ufoY = canvas.height / 2;
@@ -89,13 +92,15 @@ function drawWaiting() {
     ctx.fillText('Press Space, Click, or Tap to Start', canvas.width / 2, canvas.height / 2 + 20);
 }
 
-function update() {
+function update(dt) {
     if (gameOver || waiting) return;
-    ufoVY += GRAVITY;
-    ufoY += ufoVY;
+    ufoVY += GRAVITY * dt * 60;
+    ufoY += ufoVY * dt * 60;
 
-    // Add new trees
-    if (frame % 240 === 0) {
+    // Add new trees based on time
+    spawnTimer += dt;
+    if (spawnTimer >= SPAWN_INTERVAL) {
+        spawnTimer = 0;
         const minGapY = 20;
         const maxGapY = canvas.height - GAP_HEIGHT - 20;
         const gapY = Math.floor(Math.random() * (maxGapY - minGapY + 1)) + minGapY;
@@ -104,7 +109,7 @@ function update() {
 
     // Move trees
     for (let t of trees) {
-        t.x -= TREE_SPEED;
+        t.x -= TREE_SPEED * dt * 60;
     }
     if (trees.length && trees[0].x + TREE_WIDTH < 0) {
         trees.shift();
@@ -126,7 +131,6 @@ function update() {
     if (ufoY + UFO_RADIUS > canvas.height || ufoY - UFO_RADIUS < 0) {
         gameOver = true;
     }
-    frame++;
 }
 
 function draw() {
@@ -140,8 +144,11 @@ function draw() {
     if (gameOver) drawGameOver();
 }
 
-function gameLoop() {
-    update();
+function gameLoop(now) {
+    let dt = (now - lastTime) / 1000;
+    if (dt > 0.05) dt = 0.05; // clamp for slow frames
+    lastTime = now;
+    update(dt);
     draw();
     requestAnimationFrame(gameLoop);
 }
@@ -183,4 +190,4 @@ canvas.addEventListener('mousedown', function(e) {
     handleFlapOrRestart();
 });
 
-gameLoop();
+requestAnimationFrame(gameLoop);
