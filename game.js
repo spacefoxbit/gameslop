@@ -65,13 +65,41 @@ function drawUFO(x, y) {
     ctx.restore();
 }
 
+// Adjust UFO hitbox for more accurate collision (smaller than full ellipse)
+const UFO_HITBOX_RADIUS_X = UFO_RADIUS * 0.7;
+const UFO_HITBOX_RADIUS_Y = UFO_RADIUS * 0.5;
+
+function checkCollision(ufoX, ufoY, tree) {
+    // Check if UFO's hitbox overlaps with tree rectangles
+    // Top tree
+    if (
+        ufoX + UFO_HITBOX_RADIUS_X > tree.x &&
+        ufoX - UFO_HITBOX_RADIUS_X < tree.x + TREE_WIDTH &&
+        ufoY - UFO_HITBOX_RADIUS_Y < tree.gapY
+    ) return true;
+    // Bottom tree
+    if (
+        ufoX + UFO_HITBOX_RADIUS_X > tree.x &&
+        ufoX - UFO_HITBOX_RADIUS_X < tree.x + TREE_WIDTH &&
+        ufoY + UFO_HITBOX_RADIUS_Y > tree.gapY + GAP_HEIGHT
+    ) return true;
+    return false;
+}
+
 function drawTree(x, gapY) {
-    ctx.fillStyle = '#228B22';
-    ctx.fillRect(x, 0, TREE_WIDTH, gapY);
-    ctx.fillRect(x, gapY + GAP_HEIGHT, TREE_WIDTH, canvas.height - (gapY + GAP_HEIGHT));
-    ctx.fillStyle = '#8B5A2B';
-    ctx.fillRect(x + TREE_WIDTH/3, gapY - 20, TREE_WIDTH/3, 20);
-    ctx.fillRect(x + TREE_WIDTH/3, gapY + GAP_HEIGHT, TREE_WIDTH/3, 20);
+    // Roblox-style pixelated tree
+    ctx.save();
+    // Trunk
+    ctx.fillStyle = '#7c4a03';
+    ctx.fillRect(x + TREE_WIDTH/3, gapY - 32, TREE_WIDTH/3, 32);
+    ctx.fillRect(x + TREE_WIDTH/3, gapY + GAP_HEIGHT, TREE_WIDTH/3, 32);
+    // Leaves (pixelated blocks)
+    ctx.fillStyle = '#3cb043';
+    for (let i = 0; i < 4; i++) {
+        ctx.fillRect(x, gapY - (i+1)*16, TREE_WIDTH, 16);
+        ctx.fillRect(x, gapY + GAP_HEIGHT + i*16, TREE_WIDTH, 16);
+    }
+    ctx.restore();
 }
 
 function drawScore() {
@@ -139,10 +167,7 @@ function update(dt) {
             score++;
             t.passed = true;
         }
-        if (
-            80 + UFO_RADIUS > t.x && 80 - UFO_RADIUS < t.x + TREE_WIDTH &&
-            (ufoY - UFO_RADIUS < t.gapY || ufoY + UFO_RADIUS > t.gapY + GAP_HEIGHT)
-        ) {
+        if (checkCollision(80, ufoY, t)) {
             gameOver = true;
         }
     }
@@ -158,9 +183,12 @@ function updateBackgroundColor() {
 
 function draw() {
     updateBackgroundColor();
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Draw vertical gradient background
+    let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, `hsl(${bgHue}, 60%, 85%)`); // lighter at top
+    gradient.addColorStop(1, `hsl(${bgHue}, 60%, 55%)`); // darker at bottom
     ctx.save();
-    ctx.fillStyle = `hsl(${bgHue}, 60%, 70%)`;
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
     for (let t of trees) {
