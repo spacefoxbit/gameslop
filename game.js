@@ -5,7 +5,7 @@ const ctx = canvas.getContext('2d');
 // Double the speed for browser
 const SPEED_MULTIPLIER = 2.5; // Only apply to tree speed and spawn interval
 const GRAVITY = 0.13;
-const FLAP = -7.0;
+const FLAP = -3.5; // Reduced from -7.0 for a softer bounce
 const UFO_RADIUS = 20;
 const TREE_WIDTH = 60;
 const GAP_HEIGHT = 300;
