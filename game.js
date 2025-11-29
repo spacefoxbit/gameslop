@@ -3,9 +3,9 @@ const ctx = canvas.getContext('2d');
 
 // Game constants
 // Double the speed for browser
-const SPEED_MULTIPLIER = 2.5; // Increase this for even faster gameplay
-const GRAVITY = 0.13 * SPEED_MULTIPLIER;
-const FLAP = -7.0 * SPEED_MULTIPLIER;
+const SPEED_MULTIPLIER = 2.5; // Only apply to tree speed and spawn interval
+const GRAVITY = 0.13;
+const FLAP = -7.0;
 const UFO_RADIUS = 20;
 const TREE_WIDTH = 60;
 const GAP_HEIGHT = 300;
